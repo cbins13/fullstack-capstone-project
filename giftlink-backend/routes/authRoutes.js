@@ -29,9 +29,9 @@ router.post('/register', async (req, res) => {
         const existingEmail = await collection.findOne({ email: req.body.email });
 
         //Task 3: Check for existing email
-        
-        
-                onst salt = await bcryptjs.genSalt(10);
+
+
+        const salt = await bcryptjs.genSalt(10);
         const newUser = await collection.insertOne({
             email: req.body.email,
             firstName: req.body.firstName,
@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
             createdAt: new Date(),
         });
 
-        onst hash = await bcryptjs.hash(req.body.password, salt);
+        const hash = await bcryptjs.hash(req.body.password, salt);
         const payload = {
             user: {
                 id: newUser.insertedId,
