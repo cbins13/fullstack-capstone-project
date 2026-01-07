@@ -7,7 +7,7 @@ import Navbar from './components/Navbar/Navbar';
 import DetailsPage from './components/DetailsPage/DetailsPage';
 import SearchPage from './components/SearchPage/SearchPage';
 import LoginPage from './components/LoginPage/LoginPage';
-import RegisterPage from './components/RegisterPage/RegisterPage'
+import RegisterPage from './components/RegisterPage/RegisterPage';
 import Profile from './components/Profile/Profile';
 
 function App() {
