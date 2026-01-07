@@ -28,10 +28,18 @@ router.post('/register', async (req, res) => {
 
         const existingEmail = await collection.findOne({ email: req.body.email });
 
+        if (existingEmail) {
+            logger.error('Email already exists');
+            return res.status(400).json({ error: 'Email already exists' });
+        }
         //Task 3: Check for existing email
 
 
         const salt = await bcryptjs.genSalt(10);
+        const hash = await bcryptjs.hash(req.body.password, salt);
+        const email = req.body.email;
+
+        //Task 4: Save user details in database
         const newUser = await collection.insertOne({
             email: req.body.email,
             firstName: req.body.firstName,
@@ -40,21 +48,21 @@ router.post('/register', async (req, res) => {
             createdAt: new Date(),
         });
 
-        const hash = await bcryptjs.hash(req.body.password, salt);
+
         const payload = {
             user: {
                 id: newUser.insertedId,
             },
         };
 
-        const authtoken = jwt.sign(payload, JWT_SECRET); const email = req.body.email;
-
-        //Task 4: Save user details in database
+        const authtoken = jwt.sign(payload, JWT_SECRET);
+        
 
         //Task 5: Create JWT authentication with user._id as payload
         logger.info('User registered successfully');
         res.json({ authtoken, email });
     } catch (e) {
+        logger.error(e);
         return res.status(500).send('Internal server error');
     }
 });
@@ -78,24 +86,28 @@ router.post('/login', async (req, res) => {
                 return res.status(404).json({ error: 'Wrong pasword' });
             }
             //continue other tasks
-            // Task 5: Fetch user details from database
-            const userName = theUser.firstName;
-            const userEmail = theUser.email;
-
             // Task 6: Create JWT authentication if passwords match with user._id as payload
             let payload = {
                 user: {
                     id: theUser._id.toString(),
                 },
             };
-            jwt.sign(user._id, JWT_SECRET);
-            res.json({ authtoken, userName, userEmail });
+
+            // Task 5: Fetch user details from database
+            const userName = theUser.firstName;
+            const userEmail = theUser.email;
+
+            const authtoken = jwt.sign(payload, JWT_SECRET);
+            logger.info('User logged in successfully');
+
+            return res.status(200).json({ authtoken, userName, userEmail });
         } else {
             // Task 7: Send appropriate message if user not found
             logger.error('User not found');
             return res.status(404).json({ error: 'User not found' });
         }
     } catch (e) {
+        logger.error(e);
         return res.status(500).send('Internal server error')
     }
 })
@@ -112,35 +124,43 @@ router.put('/update', async (req, res) => {
 
     try {
         const email = req.headers.email;
+
         if (!email) {
             logger.error('Email not found in the request headers');
             return res.status(400).json({ error: "Email not found in the request headers" });
         }
+
         //Task 4: Connect to MongoDB
         const db = await connectToDatabase();
         const collection = db.collection("users");
         //Task 5: Find user credentials
         const existingUser = await collection.findOne({ email });
+
         if (!existingUser) {
             logger.error('User not found');
             return res.status(404).json({ error: "User not found" });
         }
+
         existingUser.firstName = req.body.name;
         existingUser.updatedAt = new Date();
+
         //Task 6: Update user credentials in DB
         const updatedUser = await collection.findOneAndUpdate(
             { email },
             { $set: existingUser },
             { returnDocument: 'after' }
         );
+
         //Task 7: Create JWT authentication with user._id as payload using secret key from .env file
         const payload = {
             user: {
                 id: updatedUser._id.toString(),
             },
         };
+
         const authtoken = jwt.sign(payload, JWT_SECRET);
         logger.info('User updated successfully');
+
         res.json({ authtoken });
     } catch (error) {
         logger.error(error);
