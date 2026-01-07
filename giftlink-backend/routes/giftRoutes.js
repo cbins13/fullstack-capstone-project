@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
         res.json(gifts);
     } catch (e) {
         logger.error('Error fetching gifts:', e);
-        next(e)
+        next(e);
         // res.status(500).send('Error fetching gifts');
     }
 });
@@ -50,7 +50,7 @@ router.get('/:id', async (req, res) => {
         res.json(gift);
     } catch (e) {
         logger.error('Error fetching gift:', e);
-        next(e)
+        next(e);
         //   res.status(500).send('Error fetching gift');
     }
 });
@@ -63,7 +63,6 @@ router.post('/', async (req, res, next) => {
         const db = await connectToDatabase();
         const collection = db.collection("gifts");
         const gift = await collection.insertOne(req.body);
-
         res.status(201).json(gift.ops[0]);
     } catch (e) {
         next(e);
