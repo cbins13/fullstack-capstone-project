@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './LoginPage.css';
 //{{Insert code here}} //Task 1: Import urlConfig from `giftlink-frontend/src/config.js`
 import { urlConfig } from '../../config';
@@ -46,7 +46,7 @@ function LoginPage() {
                     password: password,
                 })
             })
-            const json = await res.json();
+            const json = await response.json();
 
             if (json.authtoken) {
                 //Step 2: Task 2
